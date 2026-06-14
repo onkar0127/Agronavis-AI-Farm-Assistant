@@ -202,13 +202,14 @@ const ProfileTab: React.FC = () => {
                 </svg>
               </div>
               <div className={styles.settingsText}>
-                <span className={styles.menuItemLabel}>High Contrast Mode</span>
+                <span id="high-contrast-label" className={styles.menuItemLabel}>High Contrast Mode</span>
                 <span className={styles.settingsDesc}>Optimized for outdoor use & direct sunlight</span>
               </div>
             </div>
             <label className={styles.switch} htmlFor="high-contrast-toggle">
               <input 
                 id="high-contrast-toggle"
+                aria-labelledby="high-contrast-label"
                 type="checkbox" 
                 checked={highContrast} 
                 onChange={(e) => toggleHighContrast(e.target.checked)} 

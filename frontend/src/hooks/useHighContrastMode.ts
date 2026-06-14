@@ -1,24 +1,24 @@
 import { useState, useEffect } from 'react';
 
 export function useHighContrastMode() {
-  const [highContrast, setHighContrast] = useState(false);
-
-  useEffect(() => {
-    let hc = false;
+  const [highContrast, setHighContrast] = useState(() => {
     try {
       if (typeof window !== 'undefined') {
-        hc = localStorage.getItem('high-contrast') === 'true';
+        return localStorage.getItem('high-contrast') === 'true';
       }
     } catch (err) {
       console.error('Failed to read high-contrast from localStorage:', err);
     }
-    setHighContrast(hc);
-    if (hc) {
+    return false;
+  });
+
+  useEffect(() => {
+    if (highContrast) {
       document.documentElement.setAttribute('data-theme', 'high-contrast');
     } else {
       document.documentElement.removeAttribute('data-theme');
     }
-  }, []);
+  }, [highContrast]);
 
   const toggleHighContrast = (checked: boolean) => {
     setHighContrast(checked);
@@ -28,11 +28,6 @@ export function useHighContrastMode() {
       }
     } catch (err) {
       console.error('Failed to write high-contrast to localStorage:', err);
-    }
-    if (checked) {
-      document.documentElement.setAttribute('data-theme', 'high-contrast');
-    } else {
-      document.documentElement.removeAttribute('data-theme');
     }
   };
 
