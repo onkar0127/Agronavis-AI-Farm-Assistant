@@ -483,7 +483,7 @@
   background: #ffffff;
   border-radius: 16px;
   padding: 20px;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 6px rgb(0 0 0 / 6%);
   border: 1px solid var(--color-border);
   margin-bottom: 24px;
 }
@@ -516,7 +516,7 @@
 
 .cropSelect:focus {
   border-color: #10b981;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  box-shadow: 0 0 0 3px rgb(16 185 129 / 10%);
 }
 
 .chartContainer {
@@ -530,7 +530,7 @@
   border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 10px 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 8%);
 }
 
 .tooltipYear {

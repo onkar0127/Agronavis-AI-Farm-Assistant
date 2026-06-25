@@ -120,9 +120,38 @@ describe('AnalyticsDashboard YoY Chart', () => {
     const chart = screen.getByTestId('line-chart');
     const chartData = JSON.parse(chart.getAttribute('data-chartdata') || '[]');
 
-    // Wheat yields should be: 2024 -> 80
     expect(chartData).toEqual([
       { year: 2024, quantity: 80, unit: 'quintal' },
     ]);
   });
+
+  it('correctly normalizes and aggregates same-year records with mixed units', async () => {
+    const mixedUnitYields = [
+      { id: '1', crop_type: 'rice', quantity: 100, unit: 'quintal', year: 2024, farm_id: 'farm-1' },
+      { id: '2', crop_type: 'rice', quantity: 500, unit: 'kg', year: 2024, farm_id: 'farm-1' }, // 500 kg = 5 quintals
+      { id: '3', crop_type: 'rice', quantity: 1, unit: 'ton', year: 2024, farm_id: 'farm-1' }, // 1 ton = 10 quintals
+      { id: '4', crop_type: 'rice', quantity: 4, unit: 'bags', year: 2024, farm_id: 'farm-1' }, // 4 bags = 2 quintals
+    ];
+    (yieldApi.getYields as jest.Mock).mockResolvedValue(mixedUnitYields);
+
+    render(<AnalyticsDashboard />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('line-chart')).toBeInTheDocument();
+    });
+
+    const chart = screen.getByTestId('line-chart');
+    const chartData = JSON.parse(chart.getAttribute('data-chartdata') || '[]');
+
+    // 2024 total yield:
+    // First record: 100 quintals (unit: quintal, which sets the target unit to quintal)
+    // Second record: 500 kg = 5 quintals
+    // Third record: 1 ton = 10 quintals
+    // Fourth record: 4 bags = 2 quintals
+    // Expected sum: 100 + 5 + 10 + 2 = 117 quintals
+    expect(chartData).toEqual([
+      { year: 2024, quantity: 117, unit: 'quintal' },
+    ]);
+  });
 });
+

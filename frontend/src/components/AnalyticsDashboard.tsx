@@ -73,6 +73,25 @@ const getCropIcon = (cropType: string) =>
 const SEASONS = ['Kharif', 'Rabi', 'Zaid', 'Summer', 'Winter', 'Year-round'];
 const UNITS = ['kg', 'quintal', 'ton', 'bags', 'litre'];
 
+const convertUnit = (qty: number, fromUnit: string, toUnit: string): number => {
+  const from = (fromUnit || 'quintal').trim().toLowerCase();
+  const to = (toUnit || 'quintal').trim().toLowerCase();
+  if (from === to) return qty;
+
+  const toKgFactor: Record<string, number> = {
+    kg: 1,
+    quintal: 100,
+    ton: 1000,
+    bags: 50, // assume 50kg per bag
+    litre: 1, // approximate 1l = 1kg
+  };
+
+  const fromFactor = toKgFactor[from] || 1;
+  const toFactor = toKgFactor[to] || 1;
+
+  return (qty * fromFactor) / toFactor;
+};
+
 const AnalyticsDashboard: React.FC = () => {
   const [yields, setYields] = useState<YieldRecord[]>([]);
   const [soilRecords, setSoilRecords] = useState<SoilHealth[]>([]);
@@ -120,16 +139,18 @@ const AnalyticsDashboard: React.FC = () => {
     const groupedByYear: Record<number, { quantity: number; unit: string }> = {};
     filtered.forEach(r => {
       const yr = r.year;
+      const unit = r.unit || 'quintal';
       if (!groupedByYear[yr]) {
-        groupedByYear[yr] = { quantity: 0, unit: r.unit || 'quintal' };
+        groupedByYear[yr] = { quantity: 0, unit };
       }
-      groupedByYear[yr].quantity += r.quantity || 0;
+      const convertedQuantity = convertUnit(r.quantity || 0, unit, groupedByYear[yr].unit);
+      groupedByYear[yr].quantity += convertedQuantity;
     });
 
     return Object.entries(groupedByYear)
       .map(([year, data]) => ({
         year: parseInt(year),
-        quantity: data.quantity,
+        quantity: Number(data.quantity.toFixed(2)),
         unit: data.unit,
       }))
       .sort((a, b) => a.year - b.year);
@@ -274,6 +295,7 @@ const AnalyticsDashboard: React.FC = () => {
               <h4 className={styles.chartTitle}>YoY Yield Trend</h4>
               <select
                 className={styles.cropSelect}
+                aria-label="Select crop for YoY yield trend"
                 value={selectedCrop}
                 onChange={(e) => setSelectedCrop(e.target.value)}
               >
