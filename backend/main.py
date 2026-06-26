@@ -392,6 +392,25 @@ async def diagnose(
     if ext not in {"png", "jpg", "jpeg", "webp"}:
         raise HTTPException(status_code=400, detail="Only PNG/JPG/JPEG/WEBP images are accepted")
 
+    # Validate file size (10MB limit)
+    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+    if hasattr(file, "size") and file.size is not None:
+        if file.size > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=413,
+                detail="Payload Too Large: Maximum allowed image size is 10MB."
+            )
+    else:
+        # Fallback check by seeking
+        file.file.seek(0, 2)
+        size = file.file.tell()
+        file.file.seek(0)
+        if size > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=413,
+                detail="Payload Too Large: Maximum allowed image size is 10MB."
+            )
+
     contents = await file.read()
     result = run_inference(contents)
 

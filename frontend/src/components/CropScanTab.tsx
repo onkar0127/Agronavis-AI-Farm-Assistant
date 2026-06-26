@@ -135,6 +135,14 @@ const CropScanTab: React.FC = () => {
       setError('Please select a PNG, JPG, or WEBP image.')
       return
     }
+
+    // Validate file size (10MB limit)
+    const MAX_SIZE = 10 * 1024 * 1024 // 10MB
+    if (file.size > MAX_SIZE) {
+      setError('File size too large. Maximum size is 10MB.')
+      return
+    }
+
     setSelectedFile(file)
     setResult(null)
     setError(null)
